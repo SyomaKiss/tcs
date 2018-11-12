@@ -89,8 +89,16 @@ def is_fsa_deterministic(graph, alpha):
 
 def is_adjacent_states(graph, from_st, to_st):
     # print(graph, from_st, to_st)
-    b = [graph[from_st][tuple[0] - 1] for tuple in enumerate(graph[from_st]) if tuple[0] % 2 == 1 and tuple[1] == to_st]
-    return b
+    s = ''
+    for i,st in enumerate(graph[from_st]):
+        if i % 2 == 1 and st == to_st:
+            s += graph[from_st][i - 1]
+    if from_st == to_st:
+        if len(s) == 0:
+            s += 'eps'
+        else:
+            s += '|eps'
+    return s
 
 
 def print_table(r):
@@ -102,7 +110,7 @@ def print_table(r):
             print()
 
 
-def kleene_algorithm(graph, states, initial_state, alpha, final_state, transitions):
+def kleene_algorithm(graph, states, initial_state, alpha, final_states, transitions):
     """
     R[k]
        st1 st2
@@ -123,26 +131,26 @@ def kleene_algorithm(graph, states, initial_state, alpha, final_state, transitio
     # r[k] = [[[] for i in range(len(states))] for i in range(len(states))]
     r = [[["z" for i in states] for i in states] for i in range(2)]
     for k in range(-1, len(states)):
-        print(k)
-        print_table(r)
         r[0] = copy.deepcopy(r[1])
         for i, st1 in enumerate(states):
             for j, st2 in enumerate(states):
                 if k == -1:
                     r[1][i][j] = is_adjacent_states(graph, st1, st2)  # st can go
-                    # if (i == j): r[1][i][j].append('eps')
-                    r[1][i][j] = "(0|eps)"
                 else:
-                    r[1][i][j] = '(' + r[0][i][k] + ')'
+                    r[1][i][j] = '(' + r[0][i][k] + ')(' + r[0][k][k] + ')*(' + r[0][k][j] + ')|(' + r[0][i][j] + ')'
+        # print(k)
+        # print_table(r)
+    print()
+    print(r[1][0][0])
+    d = {}
+    for i,st in enumerate(states):
+        d[st] = i
+    s = ''
+    s += r[1][0][d[final_states[0]]]
+    for st in final_states[1:]:
+        s += '|' + r[1][0][d[st]]
 
-
-    # for i, st1 in enumerate(states):
-    #     for j, st2 in enumerate(states):
-    #         r[1][i][j] = []
-    #         if (i == j): r[1][i][j].append('eps')
-    # print("4 step")
-    # print_table(r)
-    return
+    return s
 
 
 er1 = 0
@@ -172,7 +180,7 @@ try:
     states = data[0]
     alpha = data[1]
     init = data[2][0]
-    fin = data[3][0]
+    fin = data[3]
     transitions = data[4]
     transitions = [x.split(">") for x in transitions]
 except Exception:
@@ -233,4 +241,5 @@ if er6:
 #     if w2:
 #         f.write("\nW2: Some states are not reachable from initial state")
 f.close()
-kleene_algorithm(d, states, init, alpha, fin, transitions)
+s = kleene_algorithm(d, states, init, alpha, fin, transitions)
+print(s)
