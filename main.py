@@ -233,7 +233,7 @@ if er2:
 if er4:
     f.write("Error:\nE4: Initial state is not defined")
 if er6:
-    f.write("Error\nE6: FSA is nondeterministic")
+    f.write("Error:\nE6: FSA is nondeterministic")
 # if not (er1 or er2 or er3 or er4):
 #     f.write("FSA is complete" if report else "FSA is incomplete")
 #     if w1 or w2:
