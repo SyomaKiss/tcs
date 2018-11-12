@@ -92,12 +92,14 @@ def is_adjacent_states(graph, from_st, to_st):
     s = ''
     for i,st in enumerate(graph[from_st]):
         if i % 2 == 1 and st == to_st:
-            s += graph[from_st][i - 1]
+            s += graph[from_st][i - 1] if len(s)==0 else "|"+graph[from_st][i - 1]
     if from_st == to_st:
         if len(s) == 0:
             s += 'eps'
         else:
             s += '|eps'
+    else:
+        if len(s) == 0: return "{}"
     return s
 
 
@@ -112,17 +114,15 @@ def print_table(r):
 
 def kleene_algorithm(graph, states, initial_state, alpha, final_states, transitions):
     """
-    R[k]
-       st1 st2
-    st1 []   []
-    st2 []   []
+    r[0] represents previous steps of kleene_algorithm
+    r[1] represents future computations of algorighm
     :param graph:
     :param states:
     :param initial_state:
     :param alpha:
     :param final_state:
     :param transitions:
-    :return:
+    :return: Regular expression for given DFSA
     """
     r = [[[]]]
     # print(states)
@@ -140,12 +140,14 @@ def kleene_algorithm(graph, states, initial_state, alpha, final_states, transiti
                     r[1][i][j] = '(' + r[0][i][k] + ')(' + r[0][k][k] + ')*(' + r[0][k][j] + ')|(' + r[0][i][j] + ')'
         # print(k)
         # print_table(r)
-    print()
-    print(r[1][0][0])
+    # print()
+    # print(r[1][0][0])
     d = {}
     for i,st in enumerate(states):
         d[st] = i
     s = ''
+    if len(final_states[0]) == 0:
+        return "{}"
     s += r[1][0][d[final_states[0]]]
     for st in final_states[1:]:
         s += '|' + r[1][0][d[st]]
@@ -164,7 +166,7 @@ w2 = 0
 report = 0
 
 lines = []
-f = open("input.txt")
+f = open("fsa.txt")
 for line in f:
     lines += [line]
 f.close()
@@ -226,12 +228,12 @@ if er1:
     f.write("Error:\nE1: A state '" + name_of_invalid_state + "' is not in set of states")
 if er2:
     f.write("Error:\nE2: Some states are disjoint")
-if er3:
-    f.write("Error:\nE3: A transition '" + name_of_invalid_tr + "' is not represented in the alphabet")
+# if er3:
+    # f.write("Error:\nE3: A transition '" + name_of_invalid_tr + "' is not represented in the alphabet")
 if er4:
     f.write("Error:\nE4: Initial state is not defined")
 if er6:
-    f.write("\nW3: FSA is nondeterministic")
+    f.write("Error\nE6: FSA is nondeterministic")
 # if not (er1 or er2 or er3 or er4):
 #     f.write("FSA is complete" if report else "FSA is incomplete")
 #     if w1 or w2:
@@ -240,6 +242,7 @@ if er6:
 #         f.write("\nW1: Accepting state is not defined")
 #     if w2:
 #         f.write("\nW2: Some states are not reachable from initial state")
+if not (er1 or er2 or er6 or er4):
+    s = kleene_algorithm(d, states, init, alpha, fin, transitions)
+    f.write(s)
 f.close()
-s = kleene_algorithm(d, states, init, alpha, fin, transitions)
-print(s)
