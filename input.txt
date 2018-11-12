@@ -1,0 +1,5 @@
+states={first,second}
+alpha={0,1}
+init.st={first}
+fin.st={}
+trans={first>0>first,first>1>second,second>0>first}
