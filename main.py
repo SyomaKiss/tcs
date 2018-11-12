@@ -77,10 +77,10 @@ def is_fsa_deterministic(graph, alpha):
     :param alpha: set of transitions
     :return:
     """
-    for state in d:
+    for state in graph:
         tr = graph[state]
-        for i in range(len(tr)):
-            for j in range(i + 1, len(tr)):
+        for i in range(0,len(tr),2):
+            for j in range(i + 2, len(tr),2):
                 if tr[i] in alpha and tr[j] in alpha:
                     if tr[i] == tr[j]:
                         return 0
